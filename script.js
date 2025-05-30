@@ -212,6 +212,12 @@ if (referral && !hasBonus) {
     });
     localStorage.setItem('tx_usdt', JSON.stringify(history));
 }
+const user = tg.initDataUnsafe?.user;
+if (user) {
+    const usernameText = user.username ? ` (@${user.username})` : "";
+    document.getElementById("user-info").innerText =
+        `👋 Welcome, ${user.first_name}${usernameText}`;
+}
 
 // Automatically use selected token for Receive action
 document.querySelectorAll('.icon-wrapper').forEach(btn => {
