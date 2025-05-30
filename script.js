@@ -227,3 +227,20 @@ document.querySelectorAll('.icon-wrapper').forEach(btn => {
         }
     });
 });
+// 🔄 Отправка данных пользователя на сервер
+fetch("https://crypto-wallet-backend-nu0l.onrender.com/userdata", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        id: tg.initDataUnsafe?.user?.id,
+        username: tg.initDataUnsafe?.user?.username,
+        first_name: tg.initDataUnsafe?.user?.first_name,
+    }),
+})
+    .then(res => res.json())
+    .then(data => {
+        console.log("✅ Данные отправлены на backend:", data);
+    })
+    .catch(err => {
+        console.error("❌ Ошибка при отправке:", err);
+    });
