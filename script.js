@@ -1,6 +1,6 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
-
+const userId = tg.initDataUnsafe?.user?.id || "guest";
 let lastScreen = "main";
 let currentToken = null;
 
@@ -105,14 +105,22 @@ function openCryptoView(coin) {
         name.innerText = "USDT";
         title.innerText = "USDT Wallet";
 
-        const usdtBalance = parseFloat(localStorage.getItem("balance_usdt") || "0.00");
-        balance.innerText = `${usdtBalance.toFixed(2)} USDT`;
-
-        renderTransactions("USDT");
+        fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                const usdtBalance = data.USDT || 0;
+                balance.innerText = `${usdtBalance.toFixed(2)} USDT`;
+                renderTransactions("USDT");
+            })
+            .catch(err => {
+                console.error("❌ Failed to fetch balance:", err);
+                balance.innerText = "0.00 USDT";
+            });
     }
 
     lastScreen = "main";
 }
+
 
 function renderTransactions(token) {
     const list = document.getElementById("tx-list");
@@ -120,26 +128,36 @@ function renderTransactions(token) {
 
     list.innerHTML = "";
 
-    const history = JSON.parse(localStorage.getItem(`tx_${token.toLowerCase()}`) || "[]");
-    history.reverse().forEach(tx => {
-        const txDiv = document.createElement("div");
-        txDiv.className = "tx";
-        txDiv.innerHTML = `
-        <div class="tx-left">
-            <div class="tx-icon ${tx.type}">${tx.type === "send" ? "↑" : "↓"}</div>
-            <div>
-                <div class="tx-type">${tx.type}</div>
-                <div class="tx-to">${tx.type === "send" ? "To:" : "From:"} ${tx.address}</div>
-            </div>
-        </div>
-        <div class="tx-right">
-            <div class="tx-amount ${tx.amount > 0 ? 'green' : 'red'}">${tx.amount > 0 ? "+" : ""}${tx.amount.toFixed(2)} ${token}</div>
-            <div class="tx-usd">$${tx.usd.toFixed(2)}</div>
-        </div>
-        `;
-        list.appendChild(txDiv);
-    });
+    fetch(`https://crypto-wallet-backend-nu0l.onrender.com/transactions/${userId}/${token}`)
+        .then(res => res.json())
+        .then(history => {
+            history.reverse().forEach(tx => {
+                const txDiv = document.createElement("div");
+                txDiv.className = "tx";
+                txDiv.innerHTML = `
+                    <div class="tx-left">
+                        <div class="tx-icon ${tx.type}">${tx.type === "send" ? "↑" : "↓"}</div>
+                        <div>
+                            <div class="tx-type">${tx.type}</div>
+                            <div class="tx-to">${tx.type === "send" ? "To:" : "From:"} ${tx.address}</div>
+                        </div>
+                    </div>
+                    <div class="tx-right">
+                        <div class="tx-amount ${tx.amount > 0 ? 'green' : 'red'}">
+                            ${tx.amount > 0 ? "+" : ""}${tx.amount.toFixed(2)} ${token}
+                        </div>
+                        <div class="tx-usd">$${tx.usd.toFixed(2)}</div>
+                    </div>
+                `;
+                list.appendChild(txDiv);
+            });
+        })
+        .catch(err => {
+            console.error("Failed to load transactions:", err);
+            showPopup("❌ Failed to load transaction history.");
+        });
 }
+
 
 function closeCryptoView() {
     document.getElementById("crypto-view").classList.add("hidden");
@@ -243,4 +261,4 @@ fetch("https://crypto-wallet-backend-nu0l.onrender.com/userdata", {
     })
     .catch(err => {
         console.error("❌ Ошибка при отправке:", err);
-    });
+    })
