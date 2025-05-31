@@ -1,10 +1,14 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
-const userId = tg.initDataUnsafe?.user?.id || "123456789"; // ТЕСТОВЫЙ ID
-const username = tg.initDataUnsafe?.user?.username || "TestUser";
-const first_name = tg.initDataUnsafe?.user?.first_name || "Test";
+const user = tg.initDataUnsafe?.user;
+if (!user) {
+    alert("❌ Please open this wallet from inside Telegram.");
+    throw new Error("WebApp must be opened inside Telegram.");
+}
 
-const fakeUser = { id: userId, username, first_name };
+const userId = user.id;
+const username = user.username;
+const first_name = user.first_name;
 
 let lastScreen = "main";
 let currentToken = null;
@@ -238,7 +242,7 @@ if (referralCode) {
 // 🔁 Отправка и синхронизация данных пользователя с backend
 console.log("🔁 syncUserData started");
 async function syncUserData() {
-    const user = fakeUser;
+    const user = tg.initDataUnsafe?.user;
     console.log("👤 Telegram User:UP", user);
     if (!user) return;
 
@@ -268,7 +272,7 @@ async function syncUserData() {
     }
 }
 async function activateCheck(code) {
-    const user = fakeUser;
+    const user = tg.initDataUnsafe?.user;
     console.log("👤 Telegram User:DOWN", user);
     if (!user || !code) return showPopup("❌ Invalid user or code");
 
