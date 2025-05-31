@@ -7,6 +7,7 @@ if (userId === "guest") {
 }
 let lastScreen = "main";
 let currentToken = null;
+let selectedCoin = null; // ✅ Объявляем переменную
 
 // Actions (Buy button)
 function handleAction(type) {
@@ -97,36 +98,36 @@ function openCryptoView(coin) {
     const icon = document.getElementById("crypto-icon");
     const name = document.getElementById("crypto-name");
     const title = document.getElementById("crypto-title");
-    const balance = document.getElementById("crypto-balance");
+    const balanceElem = document.getElementById("crypto-balance");
 
     if (coin === "TRX") {
         icon.src = "assets/tron.svg";
         name.innerText = "TRX";
         title.innerText = "TRX Wallet";
-        balance.innerText = "0.032 TRX";
+        balanceElem.innerText = "0.032 TRX";
         renderTransactions("TRX");
     } else {
         icon.src = "assets/usdt.svg";
         name.innerText = "USDT";
         title.innerText = "USDT Wallet";
 
-        if (userId === "guest") return;
-        fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
-            .then(res => res.json())
-            .then(data => {
-                const usdtBalance = data.USDT || 0;
-                balance.innerText = `${usdtBalance.toFixed(2)} USDT`;
-                renderTransactions("USDT");
-            })
-            .catch(err => {
-                console.error("❌ Failed to fetch balance:", err);
-                balance.innerText = "0.00 USDT";
-            });
+        if (userId !== "guest") {
+            fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const usdtBalance = data.USDT || 0;
+                    balanceElem.innerText = `${usdtBalance.toFixed(2)} USDT`;
+                    renderTransactions("USDT");
+                })
+                .catch(err => {
+                    console.error("❌ Failed to fetch balance:", err);
+                    balanceElem.innerText = "0.00 USDT";
+                });
+        }
     }
 
     lastScreen = "main";
 }
-
 
 function renderTransactions(token) {
     const list = document.getElementById("tx-list");
@@ -301,25 +302,27 @@ document.querySelectorAll('.icon-wrapper').forEach(btn => {
         }
     });
 });
+
 // 🔄 Обновляем баланс в главной секции
-if (userId === "guest") return;
-fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
-    .then(res => res.json())
-    .then(data => {
-        const balance = data.USDT || 0;
-        const balanceElem = document.getElementById("balance");
-        if (balanceElem) {
-            balanceElem.innerText = `$${balance.toFixed(2)}`;
-        }
-
-        // Обновим также значение в USDT карточке
-        const tokens = document.querySelectorAll(".token");
-        tokens.forEach(token => {
-            const name = token.querySelector(".name")?.textContent;
-            if (name?.includes("USDT")) {
-                token.querySelector(".amount").innerText = balance.toFixed(2);
+if (userId !== "guest") {
+    fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
+        .then(res => res.json())
+        .then(data => {
+            const balance = data.USDT || 0;
+            const balanceElem = document.getElementById("balance");
+            if (balanceElem) {
+                balanceElem.innerText = `$${balance.toFixed(2)}`;
             }
-        });
-    })
 
-    .catch(err => console.error("❌ Balance fetch error:", err));
+            // Обновим также значение в USDT карточке
+            const tokens = document.querySelectorAll(".token");
+            tokens.forEach(token => {
+                const name = token.querySelector(".name")?.textContent;
+                if (name?.includes("USDT")) {
+                    token.querySelector(".amount").innerText = balance.toFixed(2);
+                }
+            });
+        })
+        .catch(err => console.error("❌ Balance fetch error:", err));
+}
+
