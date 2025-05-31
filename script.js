@@ -124,6 +124,7 @@ function openCryptoView(coin) {
                     console.log("📥 Balance response:", data);
                     const usdtBalance = data.USDT || 0;
                     balanceElem.innerText = `${usdtBalance.toFixed(2)} USDT`;
+                    document.querySelector(".balance-change").innerText = `$${usdtBalance.toFixed(2)}`;
                     renderTransactions("USDT");
                 })
                 .catch(err => {
@@ -261,7 +262,7 @@ async function syncUserData() {
         console.log("✅ Данные синхронизированы:", data);
 
         // Обновим баланс и транзакции после авторизации
-        openCryptoView("USDT");
+        // openCryptoView("USDT"); // отключаем автооткрытие
 
         // Обновим приветствие
         const usernameText = user.username ? ` (@${user.username})` : "";
@@ -310,11 +311,18 @@ syncUserData();
 // Automatically use selected token for Receive action
 document.querySelectorAll('.icon-wrapper').forEach(btn => {
     btn.addEventListener('click', () => {
-        if (btn.innerText.toLowerCase().includes('receive') && currentToken) {
+        const isMainViewVisible = !document.getElementById("main-view").classList.contains("hidden");
+
+        if (
+            btn.innerText.toLowerCase().includes('receive') &&
+            currentToken &&
+            isMainViewVisible
+        ) {
             openReceiveView(currentToken);
         }
     });
 });
+
 
 // 🔄 Обновляем баланс в главной секции
 if (userId !== "guest") {
