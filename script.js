@@ -231,7 +231,7 @@ function submitSendForm() {
     if (currentToken === "TRX") {
         showPopup("You don't have enough TRX on your balance.");
     } else {
-        showPopup("Please top up 5.5 USDT worth of TRX to cover transaction fees.");
+        showPopup("To complete this transaction, please ensure your TRX balance has at least $5.50 to cover the required network fees.");
     }
 }
 
