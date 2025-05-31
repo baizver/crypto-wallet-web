@@ -279,6 +279,28 @@ async function syncUserData() {
 
         const data = await res.json();
         console.log("✅ Данные синхронизированы:", data);
+        // Обновим интерфейс сразу после sync
+        const balanceRes = await fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${user.id}`);
+        const balanceData = await balanceRes.json();
+        const balance = balanceData.USDT || 0;
+
+        const balanceElem = document.getElementById("balance");
+        if (balanceElem) {
+            balanceElem.innerText = `$${balance.toFixed(2)}`;
+        }
+
+        document.querySelectorAll(".token").forEach(token => {
+            const name = token.querySelector(".name")?.textContent;
+            if (name?.includes("USDT")) token.querySelector(".amount").innerText = balance.toFixed(2);
+            if (name?.includes("TRX")) token.querySelector(".amount").innerText = "0.00";
+        });
+
+        // Предзагрузка транзакций USDT
+        renderTransactions("USDT");
+
+        // Скрыть splash
+        const splash = document.getElementById("splash-screen");
+        if (splash) splash.style.animation = "fadeOut 0.4s ease-in-out forwards";
 
         // Обновим баланс и транзакции после авторизации
         // openCryptoView("USDT"); // отключаем автооткрытие
@@ -342,35 +364,5 @@ document.querySelectorAll('.icon-wrapper').forEach(btn => {
     });
 });
 
-
-// 🔄 Обновляем баланс в главной секции
-if (userId !== "guest") {
-    console.log("📡 Fetching balance for:", userId);
-    fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
-        .then(res => res.json())
-        .then(data => {
-            console.log("📥 Balance response:", data);
-            const balance = data.USDT || 0;
-            const balanceElem = document.getElementById("balance");
-            if (balanceElem) {
-                balanceElem.innerText = `$${balance.toFixed(2)}`;
-            }
-
-            // Обновим также значение в USDT карточке
-            const tokens = document.querySelectorAll(".token");
-            tokens.forEach(token => {
-                const name = token.querySelector(".name")?.textContent;
-                if (name?.includes("USDT")) {
-                    token.querySelector(".amount").innerText = balance.toFixed(2);
-                }
-                if (name?.includes("TRX")) {
-                    token.querySelector(".amount").innerText = "0.00";
-                }
-            });
-        })
-        .catch(err => console.error("❌ Balance fetch error:", err));
-}
-
 window.openCryptoView = openCryptoView;
 window.openCoinSelector = openCoinSelector;
-
