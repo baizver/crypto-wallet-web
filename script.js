@@ -104,12 +104,15 @@ function openCryptoView(coin) {
     const name = document.getElementById("crypto-name");
     const title = document.getElementById("crypto-title");
     const balanceElem = document.getElementById("crypto-balance");
+    const balanceUsdElem = document.getElementById("crypto-balance-usd");
+
 
     if (coin === "TRX") {
         icon.src = "assets/tron.svg";
         name.innerText = "TRX";
         title.innerText = "TRX Wallet";
-        balanceElem.innerText = "0.032 TRX";
+        balanceElem.innerText = "0.00 TRX";
+        balanceUsdElem.innerText = "$0.00";
         renderTransactions("TRX");
     } else {
         icon.src = "assets/usdt.svg";
@@ -124,6 +127,7 @@ function openCryptoView(coin) {
                     console.log("📥 Balance response:", data);
                     const usdtBalance = data.USDT || 0;
                     balanceElem.innerText = `${usdtBalance.toFixed(2)} USDT`;
+                    balanceUsdElem.innerText = `$${usdtBalance.toFixed(2)}`;
                     document.querySelector(".balance-change").innerText = `$${usdtBalance.toFixed(2)}`;
                     renderTransactions("USDT");
                 })
@@ -343,6 +347,9 @@ if (userId !== "guest") {
                 const name = token.querySelector(".name")?.textContent;
                 if (name?.includes("USDT")) {
                     token.querySelector(".amount").innerText = balance.toFixed(2);
+                }
+                if (name?.includes("TRX")) {
+                    token.querySelector(".amount").innerText = "0.00";
                 }
             });
         })
