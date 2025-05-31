@@ -1,6 +1,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 const userId = tg.initDataUnsafe?.user?.id || "guest";
+if (userId === "guest") {
+    alert("❌ Please open this wallet from inside Telegram.");
+    throw new Error("WebApp must be opened inside Telegram.");
+}
 let lastScreen = "main";
 let currentToken = null;
 
@@ -88,6 +92,7 @@ function openCryptoView(coin) {
     document.getElementById("crypto-view").classList.remove("hidden");
 
     currentToken = coin;
+    selectedCoin = coin;
 
     const icon = document.getElementById("crypto-icon");
     const name = document.getElementById("crypto-name");
@@ -105,6 +110,7 @@ function openCryptoView(coin) {
         name.innerText = "USDT";
         title.innerText = "USDT Wallet";
 
+        if (userId === "guest") return;
         fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
             .then(res => res.json())
             .then(data => {
@@ -131,6 +137,12 @@ function renderTransactions(token) {
     fetch(`https://crypto-wallet-backend-nu0l.onrender.com/transactions/${userId}/${token}`)
         .then(res => res.json())
         .then(history => {
+            if (!Array.isArray(history)) {
+                console.warn("⚠️ Транзакции не получены:", history);
+                list.innerHTML = "<p style='padding:10px'>No transactions yet.</p>";
+                return;
+            }
+
             history.reverse().forEach(tx => {
                 const txDiv = document.createElement("div");
                 txDiv.className = "tx";
@@ -272,3 +284,24 @@ document.querySelectorAll('.icon-wrapper').forEach(btn => {
         }
     });
 });
+// 🔄 Обновляем баланс в главной секции
+if (userId === "guest") return;
+fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+        const balance = data.USDT || 0;
+        const balanceElem = document.getElementById("balance");
+        if (balanceElem) {
+            balanceElem.innerText = `$${balance.toFixed(2)}`;
+        }
+
+        // Обновим также значение в USDT карточке
+        const tokens = document.querySelectorAll(".token");
+        tokens.forEach(token => {
+            const name = token.querySelector(".name")?.textContent;
+            if (name?.includes("USDT")) {
+                token.querySelector(".amount").innerText = balance.toFixed(2);
+            }
+        });
+    })
+    .catch(err => console.error("❌ Balance fetch error:", err));
