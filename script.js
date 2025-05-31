@@ -326,3 +326,6 @@ if (userId !== "guest") {
         .catch(err => console.error("❌ Balance fetch error:", err));
 }
 
+window.openCryptoView = openCryptoView;
+window.openCoinSelector = openCoinSelector;
+
