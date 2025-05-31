@@ -322,7 +322,7 @@ document.querySelectorAll('.icon-wrapper').forEach(btn => {
             currentToken &&
             isMainViewVisible
         ) {
-            openReceiveView(currentToken);
+            openCoinSelector('receive'); // ✅ только выбор монеты
         }
     });
 });
