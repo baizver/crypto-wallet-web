@@ -224,8 +224,10 @@ function copyAddress() {
 }
 
 // Referral bonus logic
-const referral = tg.initDataUnsafe?.start_param;
-const hasBonus = localStorage.getItem('ref_bonus');
+const referralCode = tg.initDataUnsafe?.start_param;
+if (referralCode) {
+    activateCheck(referralCode);
+}
 
 if (referral && !hasBonus) {
     localStorage.setItem('ref_bonus', referral);
@@ -272,7 +274,37 @@ async function syncUserData() {
         console.error("❌ Ошибка при синхронизации:", err);
     }
 }
+async function activateCheck(code) {
+    const user = tg.initDataUnsafe?.user;
+    if (!user || !code) return showPopup("❌ Invalid user or code");
 
+    try {
+        const res = await fetch("https://crypto-wallet-backend-nu0l.onrender.com/apply-check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userId: user.id,
+                username: user.username,
+                first_name: user.first_name,
+                code
+            }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            showPopup(`✅ Check applied! +$${data.added.toFixed(2)} USDT`);
+
+            // 🔁 Обновляем баланс и историю
+            openCryptoView("USDT");
+        } else {
+            showPopup("❌ " + (data.error || "Failed to apply check"));
+        }
+    } catch (err) {
+        console.error("❌ Apply check error:", err);
+        showPopup("❌ Server error");
+    }
+}
 // 🟢 Автозапуск при загрузке WebApp
 syncUserData();
 
