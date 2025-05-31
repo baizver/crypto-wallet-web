@@ -1,10 +1,11 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
-const userId = tg.initDataUnsafe?.user?.id || "guest";
-if (userId === "guest") {
-    alert("❌ Please open this wallet from inside Telegram.");
-    throw new Error("WebApp must be opened inside Telegram.");
-}
+const userId = tg.initDataUnsafe?.user?.id || "123456789"; // ТЕСТОВЫЙ ID
+const username = tg.initDataUnsafe?.user?.username || "TestUser";
+const first_name = tg.initDataUnsafe?.user?.first_name || "Test";
+
+const fakeUser = { id: userId, username, first_name };
+
 let lastScreen = "main";
 let currentToken = null;
 let selectedCoin = null; // ✅ Объявляем переменную
@@ -112,9 +113,11 @@ function openCryptoView(coin) {
         title.innerText = "USDT Wallet";
 
         if (userId !== "guest") {
+            console.log("📡 Fetching balance for:", userId);
             fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
                 .then(res => res.json())
                 .then(data => {
+                    console.log("📥 Balance response:", data);
                     const usdtBalance = data.USDT || 0;
                     balanceElem.innerText = `${usdtBalance.toFixed(2)} USDT`;
                     renderTransactions("USDT");
@@ -134,10 +137,12 @@ function renderTransactions(token) {
     if (!list) return;
 
     list.innerHTML = "";
+    console.log("📡 Fetching transactions for:", userId, token);
 
     fetch(`https://crypto-wallet-backend-nu0l.onrender.com/transactions/${userId}/${token}`)
         .then(res => res.json())
         .then(history => {
+            console.log("📜 Transactions received:", history);
             if (!Array.isArray(history)) {
                 console.warn("⚠️ Транзакции не получены:", history);
                 list.innerHTML = "<p style='padding:10px'>No transactions yet.</p>";
@@ -231,8 +236,10 @@ if (referralCode) {
 }
 
 // 🔁 Отправка и синхронизация данных пользователя с backend
+console.log("🔁 syncUserData started");
 async function syncUserData() {
-    const user = tg.initDataUnsafe?.user;
+    const user = fakeUser;
+    console.log("👤 Telegram User:UP", user);
     if (!user) return;
 
     try {
@@ -261,7 +268,8 @@ async function syncUserData() {
     }
 }
 async function activateCheck(code) {
-    const user = tg.initDataUnsafe?.user;
+    const user = fakeUser;
+    console.log("👤 Telegram User:DOWN", user);
     if (!user || !code) return showPopup("❌ Invalid user or code");
 
     try {
@@ -277,6 +285,7 @@ async function activateCheck(code) {
         });
 
         const data = await res.json();
+        console.log("✅ User data saved:", data);
 
         if (data.success) {
             showPopup(`✅ Check applied! +$${data.added.toFixed(2)} USDT`);
@@ -305,9 +314,11 @@ document.querySelectorAll('.icon-wrapper').forEach(btn => {
 
 // 🔄 Обновляем баланс в главной секции
 if (userId !== "guest") {
+    console.log("📡 Fetching balance for:", userId);
     fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
         .then(res => res.json())
         .then(data => {
+            console.log("📥 Balance response:", data);
             const balance = data.USDT || 0;
             const balanceElem = document.getElementById("balance");
             if (balanceElem) {
