@@ -230,12 +230,39 @@ if (referral && !hasBonus) {
     });
     localStorage.setItem('tx_usdt', JSON.stringify(history));
 }
-const user = tg.initDataUnsafe?.user;
-if (user) {
-    const usernameText = user.username ? ` (@${user.username})` : "";
-    document.getElementById("user-info").innerText =
-        `👋 Welcome, ${user.first_name}${usernameText}`;
+// 🔁 Отправка и синхронизация данных пользователя с backend
+async function syncUserData() {
+    const user = tg.initDataUnsafe?.user;
+    if (!user) return;
+
+    try {
+        const res = await fetch("https://crypto-wallet-backend-nu0l.onrender.com/userdata", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: user.id,
+                username: user.username,
+                first_name: user.first_name,
+            }),
+        });
+
+        const data = await res.json();
+        console.log("✅ Данные синхронизированы:", data);
+
+        // Обновим баланс и транзакции после авторизации
+        openCryptoView("USDT");
+
+        // Обновим приветствие
+        const usernameText = user.username ? ` (@${user.username})` : "";
+        document.getElementById("user-info").innerText =
+            `👋 Welcome, ${user.first_name}${usernameText}`;
+    } catch (err) {
+        console.error("❌ Ошибка при синхронизации:", err);
+    }
 }
+
+// 🟢 Автозапуск при загрузке WebApp
+syncUserData();
 
 // Automatically use selected token for Receive action
 document.querySelectorAll('.icon-wrapper').forEach(btn => {
@@ -245,20 +272,3 @@ document.querySelectorAll('.icon-wrapper').forEach(btn => {
         }
     });
 });
-// 🔄 Отправка данных пользователя на сервер
-fetch("https://crypto-wallet-backend-nu0l.onrender.com/userdata", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-        id: tg.initDataUnsafe?.user?.id,
-        username: tg.initDataUnsafe?.user?.username,
-        first_name: tg.initDataUnsafe?.user?.first_name,
-    }),
-})
-    .then(res => res.json())
-    .then(data => {
-        console.log("✅ Данные отправлены на backend:", data);
-    })
-    .catch(err => {
-        console.error("❌ Ошибка при отправке:", err);
-    })
