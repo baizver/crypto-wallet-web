@@ -212,12 +212,27 @@ function pasteAddress() {
 }
 
 function setMax() {
-    document.getElementById("send-amount").value = "3.00";
+    const amountInput = document.getElementById("send-amount");
+    let maxAmount = 0;
+
+    if (currentToken === "USDT") {
+        const text = document.getElementById("crypto-balance")?.innerText;
+        maxAmount = parseFloat(text?.replace("USDT", "").trim()) || 0;
+    } else if (currentToken === "TRX") {
+        maxAmount = 0.00; // По ТЗ TRX всегда 0.00
+    }
+
+    amountInput.value = maxAmount.toFixed(2);
     validateSendForm();
 }
 
+
 function submitSendForm() {
-    showPopup("Please top up 5.5 USDT worth of TRX to cover transaction fees.");
+    if (currentToken === "TRX") {
+        showPopup("You don't have enough TRX on your balance.");
+    } else {
+        showPopup("Please top up 5.5 USDT worth of TRX to cover transaction fees.");
+    }
 }
 
 function showPopup(message) {
