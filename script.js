@@ -13,6 +13,10 @@ const first_name = user.first_name;
 let lastScreen = "main";
 let currentToken = null;
 let selectedCoin = null; // ✅ Объявляем переменную
+let transactionsLoaded = {
+    USDT: false,
+    TRX: false
+};
 
 // Actions (Buy button)
 function handleAction(type) {
@@ -142,6 +146,9 @@ function openCryptoView(coin) {
 }
 
 function renderTransactions(token) {
+    if (transactionsLoaded[token]) return; // ✅ уже загружено
+    transactionsLoaded[token] = true;      // ✅ ставим флаг
+
     const list = document.getElementById("tx-list");
     if (!list) return;
 
@@ -283,6 +290,10 @@ async function syncUserData() {
         const balanceRes = await fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${user.id}`);
         const balanceData = await balanceRes.json();
         const balance = balanceData.USDT || 0;
+        const usdChangeElem = document.querySelector(".balance-change");
+        if (usdChangeElem) {
+            usdChangeElem.innerText = `$${balance.toFixed(2)}`;
+        }
 
         const balanceElem = document.getElementById("balance");
         if (balanceElem) {
@@ -300,7 +311,10 @@ async function syncUserData() {
 
         // Скрыть splash
         const splash = document.getElementById("splash-screen");
-        if (splash) splash.style.animation = "fadeOut 0.4s ease-in-out forwards";
+        setTimeout(() => {
+            const splash = document.getElementById("splash-screen");
+            if (splash) splash.style.animation = "fadeOut 0.4s ease-in-out forwards";
+        }, 1500);
 
         // Обновим баланс и транзакции после авторизации
         // openCryptoView("USDT"); // отключаем автооткрытие
