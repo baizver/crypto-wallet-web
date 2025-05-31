@@ -229,21 +229,6 @@ if (referralCode) {
     activateCheck(referralCode);
 }
 
-if (referral && !hasBonus) {
-    localStorage.setItem('ref_bonus', referral);
-    localStorage.setItem('balance_usdt', '3.00');
-
-    const history = JSON.parse(localStorage.getItem('tx_usdt') || '[]');
-    history.push({
-        type: 'receive',
-        address: `Referral: ${referral}`,
-        amount: 3.00,
-        token: 'USDT',
-        usd: 3.00,
-        date: new Date().toISOString().split('T')[0]
-    });
-    localStorage.setItem('tx_usdt', JSON.stringify(history));
-}
 // 🔁 Отправка и синхронизация данных пользователя с backend
 async function syncUserData() {
     const user = tg.initDataUnsafe?.user;
@@ -336,4 +321,5 @@ fetch(`https://crypto-wallet-backend-nu0l.onrender.com/balance/${userId}`)
             }
         });
     })
+
     .catch(err => console.error("❌ Balance fetch error:", err));
